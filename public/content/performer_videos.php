@@ -44,6 +44,17 @@ $performerName = $performer['performer_name'] ?? 'パフォーマー';
             <?php if (!empty($performer['video_tag'])): ?>
                 <p class="meta">タグ: <span><?= htmlspecialchars($performer['video_tag'], ENT_QUOTES, 'UTF-8') ?></span></p>
             <?php endif; ?>
+            <div class="performer-actions">
+                <button
+                    class="button secondary"
+                    type="button"
+                    data-action="fetch-performer-views"
+                    data-performer-id="<?= htmlspecialchars((string)$performerId, ENT_QUOTES, 'UTF-8') ?>"
+                >
+                    再生数を取得
+                </button>
+                <p class="view-status" data-performer-view-status aria-live="polite"></p>
+            </div>
         </div>
     </section>
 

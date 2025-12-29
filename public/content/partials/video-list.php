@@ -40,7 +40,7 @@ $formatMetric = static function ($value): string {
                 $thumbUrl = $videoId ? "https://i.ytimg.com/vi/{$videoId}/hqdefault.jpg" : '';
                 $videoUrl = $videoId ? "https://www.youtube.com/watch?v={$videoId}" : '';
             ?>
-            <li class="video-item">
+            <li class="video-item" data-video-id="<?= htmlspecialchars((string)$videoId, ENT_QUOTES, 'UTF-8') ?>">
                 <div class="video-content">
                     <div class="video-title-row">
                         <h4><?= htmlspecialchars($video['video_tag'] ?? '動画タグなし', ENT_QUOTES, 'UTF-8') ?></h4>
@@ -64,7 +64,15 @@ $formatMetric = static function ($value): string {
                         <div><dt>view_24h</dt><dd><?= $formatMetric($video['view_24h'] ?? null) ?></dd></div>
                         <div><dt>view_48h</dt><dd><?= $formatMetric($video['view_48h'] ?? null) ?></dd></div>
                         <div><dt>view_month</dt><dd><?= $formatMetric($video['view_month'] ?? null) ?></dd></div>
-                        <div><dt>view_real</dt><dd><?= $formatMetric($video['view_real'] ?? null) ?></dd></div>
+                        <div>
+                            <dt>view_real</dt>
+                            <dd
+                                class="video-view-real"
+                                data-video-view-real="<?= htmlspecialchars((string)$videoId, ENT_QUOTES, 'UTF-8') ?>"
+                            >
+                                <?= $formatMetric($video['view_real'] ?? null) ?>
+                            </dd>
+                        </div>
                     </dl>
                 </div>
 
