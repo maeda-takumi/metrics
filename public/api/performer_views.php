@@ -12,6 +12,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 require_once __DIR__ . '/../../models/video.php';
 require_once __DIR__ . '/../../models/view_real.php';
 require_once __DIR__ . '/../../services/YouTubeClient.php';
+require_once __DIR__ . '/../../services/YouTubeLogger.php';
 
 $raw = file_get_contents('php://input');
 $payload = json_decode($raw, true);
@@ -98,10 +99,24 @@ if (empty($videoIds)) {
 }
 
 try {
+    YouTubeLogger::log([
+        'event' => 'performer_views.request_received',
+        'performer_id' => $performerId,
+        'video_ids' => $videoIds,
+    ]);
     $client = new YouTubeClient();
     $result = $client->fetchVideoStatistics($videoIds);
 } catch (YouTubeApiException $e) {
     $status = $e->isQuotaError() ? 429 : 502;
+    YouTubeLogger::log([
+        'event' => 'performer_views.youtube_api_exception',
+        'performer_id' => $performerId,
+        'video_ids' => $videoIds,
+        'status' => $status,
+        'reason' => $e->getReason(),
+        'message' => $e->getMessage(),
+        'response_snippet' => $e->getResponse(),
+    ]);
     http_response_code($status);
     echo json_encode([
         'error' => 'YouTube API error',
@@ -110,6 +125,12 @@ try {
     ]);
     exit;
 } catch (Throwable $e) {
+    YouTubeLogger::log([
+        'event' => 'performer_views.unhandled_exception',
+        'performer_id' => $performerId,
+        'video_ids' => $videoIds,
+        'message' => $e->getMessage(),
+    ]);
     http_response_code(500);
     echo json_encode(['error' => $e->getMessage()]);
     exit;
@@ -125,6 +146,12 @@ foreach ($result['statistics'] as $videoId => $stats) {
     $viewCount = isset($stats['viewCount']) ? (int) $stats['viewCount'] : null;
 
     if ($viewCount === null) {
+        YouTubeLogger::log([
+            'event' => 'performer_views.view_count_missing',
+            'performer_id' => $performerId,
+            'video_id' => $videoId,
+            'statistics' => $stats,
+        ]);
         $updateErrors[] = [
             'video_id' => $videoId,
             'message' => 'viewCount not returned.',
@@ -155,11 +182,25 @@ foreach ($result['statistics'] as $videoId => $stats) {
             'message' => 'Failed to update database.',
         ];
     }
+    YouTubeLogger::log([
+        'event' => 'performer_views.update_result',
+        'performer_id' => $performerId,
+        'video_id' => $videoId,
+        'view_count' => $viewCount,
+        'success_view_real' => $successViewReal,
+        'success_video' => $successVideo,
+    ]);
 }
 
 if (!empty($result['errors'])) {
     foreach ($result['errors'] as $error) {
         $updateErrors[] = $error;
+        YouTubeLogger::log([
+            'event' => 'performer_views.api_error',
+            'performer_id' => $performerId,
+            'video_ids' => $videoIds,
+            'error' => $error,
+        ]);
     }
 }
 

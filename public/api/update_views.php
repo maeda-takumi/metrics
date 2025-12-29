@@ -11,6 +11,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 
 require_once __DIR__ . '/../../models/video.php';
 require_once __DIR__ . '/../../services/YouTubeClient.php';
+require_once __DIR__ . '/../../services/YouTubeLogger.php';
 
 $input = file_get_contents('php://input');
 $payload = json_decode($input, true);
@@ -41,10 +42,24 @@ if (!is_array($videoIds)) {
 }
 
 try {
+    YouTubeLogger::log([
+        'event' => 'update_views.request_received',
+        'performer_id' => $performerId,
+        'video_ids' => $videoIds,
+    ]);
     $client = new YouTubeClient();
     $result = $client->fetchVideoStatistics($videoIds);
 } catch (YouTubeApiException $e) {
     $status = $e->isQuotaError() ? 429 : 502;
+    YouTubeLogger::log([
+        'event' => 'update_views.youtube_api_exception',
+        'performer_id' => $performerId,
+        'video_ids' => $videoIds,
+        'status' => $status,
+        'reason' => $e->getReason(),
+        'message' => $e->getMessage(),
+        'response_snippet' => $e->getResponse(),
+    ]);
     http_response_code($status);
     echo json_encode([
         'error' => 'YouTube API error',
@@ -53,6 +68,12 @@ try {
     ]);
     exit;
 } catch (Throwable $e) {
+    YouTubeLogger::log([
+        'event' => 'update_views.unhandled_exception',
+        'performer_id' => $performerId,
+        'video_ids' => $videoIds,
+        'message' => $e->getMessage(),
+    ]);
     http_response_code(500);
     echo json_encode(['error' => $e->getMessage()]);
     exit;
@@ -67,6 +88,12 @@ $now = (new DateTime('now', new DateTimeZone(date_default_timezone_get())))->for
 foreach ($result['statistics'] as $videoId => $stats) {
     $viewCount = isset($stats['viewCount']) ? (int) $stats['viewCount'] : null;
     if ($viewCount === null) {
+        YouTubeLogger::log([
+            'event' => 'update_views.view_count_missing',
+            'performer_id' => $performerId,
+            'video_id' => $videoId,
+            'statistics' => $stats,
+        ]);
         $updateErrors[] = [
             'video_id' => $videoId,
             'message' => 'viewCount not returned.'
@@ -78,6 +105,13 @@ foreach ($result['statistics'] as $videoId => $stats) {
         'view_count' => $viewCount,
         'last_fetched_at' => $now
     ], $performerId);
+    YouTubeLogger::log([
+        'event' => 'update_views.update_result',
+        'performer_id' => $performerId,
+        'video_id' => $videoId,
+        'view_count' => $viewCount,
+        'success' => $success,
+    ]);
 
     if ($success) {
         $updated[] = [
@@ -96,6 +130,12 @@ foreach ($result['statistics'] as $videoId => $stats) {
 if (!empty($result['errors'])) {
     foreach ($result['errors'] as $error) {
         $updateErrors[] = $error;
+        YouTubeLogger::log([
+            'event' => 'update_views.api_error',
+            'performer_id' => $performerId,
+            'video_ids' => $videoIds,
+            'error' => $error,
+        ]);
     }
 }
 
