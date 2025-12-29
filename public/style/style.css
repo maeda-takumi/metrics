@@ -145,7 +145,13 @@ textarea {
     gap: 6px;
     min-width: 0;
 }
+.performer-actions {
+    margin-top: auto;
+}
 
+.performer-actions .button {
+    text-decoration: none;
+}
 .performer-title {
     display: flex;
     align-items: center;
@@ -188,7 +194,9 @@ textarea {
     box-shadow: 0 6px 20px rgba(0,0,0,0.06);
     margin: 12px 0 20px 84px;
 }
-
+.video-section--standalone {
+    margin: 16px 0 0;
+}
 .video-header {
     display: flex;
     align-items: center;
@@ -276,6 +284,7 @@ textarea {
     border: none;
     font-weight: 700;
     font-size: 14px;
+    text-decoration: none;
     cursor: pointer;
     transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
 }
@@ -416,19 +425,6 @@ textarea {
     .video-grid {
         grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
     }
-}
-.button {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 6px;
-    padding: 10px 14px;
-    border: none;
-    border-radius: 10px;
-    font-size: 14px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
 }
 
 .button.primary {

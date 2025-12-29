@@ -81,6 +81,11 @@
                     <?php if (!empty($performer['video_tag'])): ?>
                         <p class="meta">タグ: <span><?= htmlspecialchars($performer['video_tag'], ENT_QUOTES, 'UTF-8') ?></span></p>
                     <?php endif; ?>
+                    <?php if ($performerId !== ''): ?>
+                        <div class="performer-actions">
+                            <a class="button primary" href="performer_videos.php?performer_id=<?= htmlspecialchars((string)$performerId, ENT_QUOTES, 'UTF-8') ?>">動画一覧</a>
+                        </div>
+                    <?php endif; ?>
                 </div>
             </article>
             <?php include __DIR__ . '/partials/video-list.php'; ?>
@@ -92,4 +97,3 @@
         </div>
     <?php endif; ?>
 </div>
-public/index.php

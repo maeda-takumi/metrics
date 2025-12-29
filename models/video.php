@@ -24,6 +24,13 @@ class Video extends Model {
         return $this->table;
     }
 
+    public function findByPerformerId(int $performerId): array {
+        $stmt = $this->pdo->prepare("SELECT * FROM {$this->table} WHERE performer_id = ?");
+        $stmt->execute([$performerId]);
+
+        return $stmt->fetchAll();
+    }
+
     public function exportStatement(?int $performerId = null): PDOStatement {
         $sql = "SELECT v.*, p.performer_name, p.performer, p.video_tag, p.img FROM {$this->table} v LEFT JOIN performer p ON v.performer_id = p.performer_id";
         $params = [];

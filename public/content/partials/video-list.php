@@ -1,9 +1,10 @@
 <?php
 $videoList = $videoList ?? [];
 $performerId = $performerId ?? '';
+$videoSectionClass = $videoSectionClass ?? 'video-section';
 ?>
 
-<div class="video-section">
+<div class="<?= htmlspecialchars($videoSectionClass, ENT_QUOTES, 'UTF-8') ?>">
     <div class="video-header">
         <h3>動画一覧</h3>
         <p class="meta">パフォーマーに紐づく動画のビュー数取得を実行できます。</p>
