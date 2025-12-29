@@ -7,7 +7,7 @@ class Database {
     private function __construct() {
 
         // config/database.php を読み込む
-        $config = require __DIR__ . '../config/database.php';
+        $config = require __DIR__ . '/../config/database.php';
 
         $host = $config['host'];
         $db   = $config['dbname'];
