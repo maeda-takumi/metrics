@@ -10,6 +10,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 }
 
 require_once __DIR__ . '/../../models/video.php';
+require_once __DIR__ . '/../../models/view_real.php';
 require_once __DIR__ . '/../../services/YouTubeClient.php';
 require_once __DIR__ . '/../../services/YouTubeLogger.php';
 
@@ -80,6 +81,7 @@ try {
 }
 
 $videoModel = new Video();
+$viewRealModel = new ViewReal();
 $updated = [];
 $updateErrors = [];
 
@@ -101,19 +103,52 @@ foreach ($result['statistics'] as $videoId => $stats) {
         continue;
     }
 
-    $success = $videoModel->updateByVideoId($videoId, [
-        'view_count' => $viewCount,
-        'last_fetched_at' => $now
-    ], $performerId);
+
+    $successVideo = false;
+    $successViewReal = false;
+
+    try {
+        $successViewReal = $viewRealModel->upsertViewCount($videoId, $viewCount, $performerId, $now);
+    } catch (Throwable $e) {
+        YouTubeLogger::log([
+            'event' => 'update_views.view_real_update_error',
+            'performer_id' => $performerId,
+            'video_id' => $videoId,
+            'view_count' => $viewCount,
+            'message' => $e->getMessage(),
+        ]);
+        $updateErrors[] = [
+            'video_id' => $videoId,
+            'message' => 'Failed to upsert view_real: ' . $e->getMessage(),
+        ];
+    }
+
+    try {
+        $successVideo = $videoModel->updateByVideoId($videoId, ['view_real' => $viewCount], $performerId);
+    } catch (Throwable $e) {
+        YouTubeLogger::log([
+            'event' => 'update_views.video_update_error',
+            'performer_id' => $performerId,
+            'video_id' => $videoId,
+            'view_count' => $viewCount,
+            'message' => $e->getMessage(),
+        ]);
+        $updateErrors[] = [
+            'video_id' => $videoId,
+            'message' => 'Failed to update youtube_video_metrics: ' . $e->getMessage(),
+        ];
+    }
+
     YouTubeLogger::log([
         'event' => 'update_views.update_result',
         'performer_id' => $performerId,
         'video_id' => $videoId,
         'view_count' => $viewCount,
-        'success' => $success,
+        'success_view_real' => $successViewReal,
+        'success_video' => $successVideo,
     ]);
 
-    if ($success) {
+    if ($successViewReal || $successVideo) {
         $updated[] = [
             'video_id' => $videoId,
             'view_count' => $viewCount,
@@ -122,7 +157,7 @@ foreach ($result['statistics'] as $videoId => $stats) {
     } else {
         $updateErrors[] = [
             'video_id' => $videoId,
-            'message' => 'Failed to update the video record.'
+            'message' => 'Failed to update database.'
         ];
     }
 }
