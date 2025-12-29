@@ -2,23 +2,40 @@
 require_once __DIR__ . '/../core/Model.php';
 
 class Video extends Model {
-    protected $table = 'video';
+    protected $table = 'videos';
 
-    /**
-     * @param array $performerIds
-     * @return array
-     */
-    public function findByPerformerIds(array $performerIds): array
-    {
-        if (empty($performerIds)) {
-            return [];
+    public function __construct() {
+        parent::__construct();
+        $this->table = $this->determineTableName();
+    }
+
+    private function determineTableName(): string {
+        $candidates = ['videos', 'video'];
+
+        foreach ($candidates as $candidate) {
+            $stmt = $this->pdo->prepare('SHOW TABLES LIKE ?');
+            $stmt->execute([$candidate]);
+
+            if ($stmt->fetchColumn()) {
+                return $candidate;
+            }
         }
 
-        $placeholders = implode(', ', array_fill(0, count($performerIds), '?'));
-        $sql = "SELECT * FROM {$this->table} WHERE performer_id IN ($placeholders)";
-        $stmt = $this->pdo->prepare($sql);
-        $stmt->execute(array_values($performerIds));
+        return $this->table;
+    }
 
-        return $stmt->fetchAll();
+    public function exportStatement(?int $performerId = null): PDOStatement {
+        $sql = "SELECT v.*, p.performer_name, p.performer, p.video_tag, p.img FROM {$this->table} v LEFT JOIN performer p ON v.performer_id = p.performer_id";
+        $params = [];
+
+        if ($performerId !== null) {
+            $sql .= ' WHERE v.performer_id = ?';
+            $params[] = $performerId;
+        }
+
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute($params);
+
+        return $stmt;
     }
 }

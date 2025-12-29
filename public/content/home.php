@@ -4,8 +4,55 @@
         <h1>パフォーマー一覧</h1>
         <p class="lede">YouTube 指標の取得対象となるパフォーマーをカードで確認できます。</p>
     </div>
+    <form class="csv-export-form" action="export_videos.php" method="get">
+        <label for="csv-performer" class="csv-export-label">CSV出力</label>
+        <div class="csv-export-controls">
+            <select id="csv-performer" name="performer_id">
+                <option value="">すべてのパフォーマー</option>
+                <?php foreach ($performers as $performer): ?>
+                    <option value="<?= htmlspecialchars($performer['performer_id'], ENT_QUOTES, 'UTF-8') ?>">
+                        <?= htmlspecialchars($performer['performer_name'] ?? 'Unknown', ENT_QUOTES, 'UTF-8') ?>
+                    </option>
+                <?php endforeach; ?>
+            </select>
+            <button type="submit" class="button primary">CSV出力</button>
+        </div>
+    </form>    
 </div>
-
+<?php if (!empty($videos)): ?>
+    <section class="card video-section">
+        <header class="video-section__header">
+            <div>
+                <p class="eyebrow">Videos</p>
+                <h2 class="video-section__title">動画一覧</h2>
+            </div>
+            <p class="video-section__hint">サムネイルをクリックすると YouTube で再生できます。</p>
+        </header>
+        <div class="video-grid" role="list">
+            <?php foreach ($videos as $video): ?>
+                <article class="video-card" role="listitem">
+                    <a class="video-thumb" href="https://www.youtube.com/watch?v=<?= htmlspecialchars($video['video_id'], ENT_QUOTES, 'UTF-8') ?>" target="_blank" rel="noopener noreferrer">
+                        <img
+                            src="<?= htmlspecialchars($video['thumbnail_url'], ENT_QUOTES, 'UTF-8') ?>"
+                            alt="<?= htmlspecialchars($video['title'] ?? 'YouTube動画', ENT_QUOTES, 'UTF-8') ?>"
+                            loading="lazy"
+                        >
+                    </a>
+                    <div class="video-meta">
+                        <h3 class="video-title">
+                            <a href="https://www.youtube.com/watch?v=<?= htmlspecialchars($video['video_id'], ENT_QUOTES, 'UTF-8') ?>" target="_blank" rel="noopener noreferrer">
+                                <?= htmlspecialchars($video['title'] ?? 'YouTube動画', ENT_QUOTES, 'UTF-8') ?>
+                            </a>
+                        </h3>
+                        <?php if (!empty($video['performer_name'])): ?>
+                            <p class="video-performer">出演: <?= htmlspecialchars($video['performer_name'], ENT_QUOTES, 'UTF-8') ?></p>
+                        <?php endif; ?>
+                    </div>
+                </article>
+            <?php endforeach; ?>
+        </div>
+    </section>
+<?php endif; ?>
 <div class="performer-grid">
     <?php if (!empty($performers)): ?>
         <?php foreach ($performers as $performer): ?>
