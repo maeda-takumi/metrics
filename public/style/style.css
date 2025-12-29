@@ -108,8 +108,9 @@ textarea {
     background: var(--base-white);
     border-radius: 14px;
     padding: 16px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
     transition: transform 0.18s ease, box-shadow 0.18s ease;
+    max-width: 350px;
 }
 
 .performer-card:hover {
@@ -173,6 +174,7 @@ textarea {
     border-radius: 999px;
     font-size: 12px;
     font-weight: 600;
+    margin-left: auto;
 }
 
 .meta {

@@ -2,7 +2,7 @@
 require_once __DIR__ . '/../core/Model.php';
 
 class Video extends Model {
-    protected $table = 'videos';
+    protected $table = 'youtube_video_metrics';
 
     public function __construct() {
         parent::__construct();
@@ -10,13 +10,22 @@ class Video extends Model {
     }
 
     private function determineTableName(): string {
-        $candidates = ['youtube_video_metrics', 'video'];
+        $candidates = array_unique([
+            $this->table,
+            'videos',
+            'video',
+        ]);
 
-        $existingTable = $this->findExistingTable($candidates);
-        if ($existingTable !== null) {
-            return $existingTable;
+        foreach ($candidates as $candidate) {
+            $stmt = $this->pdo->prepare('SHOW TABLES LIKE ?');
+            $stmt->execute([$candidate]);
+
+            if ($stmt->fetchColumn()) {
+                return $candidate;
+            }
         }
-        throw new DomainException('動画テーブルが見つかりません。videos テーブルを作成するか、マイグレーションを実行してください。');
+
+        return $this->table;
     }
 
     public function findByPerformerId(int $performerId): array {
