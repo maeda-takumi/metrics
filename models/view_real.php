@@ -20,21 +20,45 @@ class ViewReal extends Model {
         return $this->findExistingTable($candidates) ?? $this->table;
     }
     public function upsertViewReal(string $videoId, int $viewReal, ?int $performerId): bool {
-        $sql = <<<SQL
-            INSERT INTO {$this->table} (video_id, performer_id, view_real)
-            VALUES (?, ?, ?)
-            ON DUPLICATE KEY UPDATE
-                performer_id = VALUES(performer_id),
-                view_real = VALUES(view_real),
-                updated_at = NOW()
-        SQL;
+        $setClauses = [
+            'view_real = ?',
+            'updated_at = NOW()'
+        ];
+        $where = 'video_id = ?';
+
+        $params = [$viewReal];
+        $whereParams = [$videoId];
+
+        if ($performerId !== null) {
+            $setClauses[] = 'performer_id = ?';
+            $params[] = $performerId;
+            $where .= ' AND performer_id = ?';
+            $whereParams[] = $performerId;
+        }
+
+        $sql = sprintf(
+            'UPDATE %s SET %s WHERE %s',
+            $this->table,
+            implode(', ', $setClauses),
+            $where
+        );
 
         $stmt = $this->pdo->prepare($sql);
-        return $stmt->execute([
-            $videoId,
-            $performerId,
-            $viewReal,
-        ]);
+
+        $stmt->execute(array_merge($params, $whereParams));
+
+        if ($stmt->rowCount() === 0) {
+            $existsSql = "SELECT 1 FROM {$this->table} WHERE {$where} LIMIT 1";
+            $existsStmt = $this->pdo->prepare($existsSql);
+            $existsStmt->execute($whereParams);
+
+            if ($existsStmt->fetchColumn() === false) {
+                $performerMessage = $performerId !== null ? " for performer {$performerId}" : '';
+                throw new RuntimeException("No {$this->table} row matched video_id {$videoId}{$performerMessage}.");
+            }
+        }
+
+        return true;
     }
 
     public function findByVideoIds(array $videoIds): array {

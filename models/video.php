@@ -114,6 +114,7 @@ class Video extends Model {
         $setClause = implode(', ', array_map(fn($column) => "$column = ?", array_keys($data)));
         $values = array_values($data);
 
+        $setClause .= ', updated_at = NOW()';
         $sql = "UPDATE {$this->table} SET {$setClause} WHERE video_id = ?";
         $values[] = $videoId;
 
@@ -123,8 +124,26 @@ class Video extends Model {
         }
 
         $stmt = $this->pdo->prepare($sql);
+        $stmt->execute($values);
 
-        return $stmt->execute($values);
+        if ($stmt->rowCount() === 0) {
+            $whereClause = 'video_id = ?';
+            $checkParams = [$videoId];
+
+            if ($performerId !== null) {
+                $whereClause .= ' AND performer_id = ?';
+                $checkParams[] = $performerId;
+            }
+
+            $existsStmt = $this->pdo->prepare("SELECT 1 FROM {$this->table} WHERE {$whereClause} LIMIT 1");
+            $existsStmt->execute($checkParams);
+
+            if ($existsStmt->fetchColumn() === false) {
+                $performerMessage = $performerId !== null ? " and performer_id {$performerId}" : '';
+                throw new RuntimeException("No {$this->table} row matched video_id {$videoId}{$performerMessage}.");
+            }
+        }
+        return true;
     }
     public function findForDeletion(?int $id, ?string $videoId, int $performerId): ?array {
         $matchClauses = [];

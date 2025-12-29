@@ -159,8 +159,24 @@ foreach ($result['statistics'] as $videoId => $stats) {
         continue;
     }
 
-    $successViewReal = $viewRealModel->upsertViewReal($videoId, $viewCount, $performerId);
+    $successViewReal = false;
     $successVideo = false;
+    try {
+        $successViewReal = $viewRealModel->upsertViewReal($videoId, $viewCount, $performerId);
+    } catch (Throwable $e) {
+        $updateErrors[] = [
+            'video_id' => $videoId,
+            'message' => 'Failed to update view_real: ' . $e->getMessage(),
+        ];
+        YouTubeLogger::log([
+            'event' => 'performer_views.view_real_update_error',
+            'performer_id' => $performerId,
+            'video_id' => $videoId,
+            'view_count' => $viewCount,
+            'message' => $e->getMessage(),
+        ]);
+    }
+
     try {
         $successVideo = $videoModel->updateByVideoId($videoId, ['view_real' => $viewCount], $performerId);
     } catch (Throwable $e) {
