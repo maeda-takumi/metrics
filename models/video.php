@@ -38,4 +38,25 @@ class Video extends Model {
 
         return $stmt;
     }
+
+    public function updateByVideoId(string $videoId, array $data, ?int $performerId = null): bool {
+        if (empty($data)) {
+            return false;
+        }
+
+        $setClause = implode(', ', array_map(fn($column) => "$column = ?", array_keys($data)));
+        $values = array_values($data);
+
+        $sql = "UPDATE {$this->table} SET {$setClause} WHERE video_id = ?";
+        $values[] = $videoId;
+
+        if ($performerId !== null) {
+            $sql .= " AND performer_id = ?";
+            $values[] = $performerId;
+        }
+
+        $stmt = $this->pdo->prepare($sql);
+
+        return $stmt->execute($values);
+    }
 }
