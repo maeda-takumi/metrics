@@ -1,0 +1,127 @@
+/* ============================
+   基本カラー設定
+============================ */
+:root {
+    --base-white: #ffffff;
+    --base-gray: #f5f5f5;
+    --line-gray: #dddddd;
+    --text-gray: #333333;
+
+    --accent-blue: #3b82f6; /* アクセントカラー */
+}
+
+/* ============================
+   基本レイアウト
+============================ */
+body {
+    background: var(--base-gray);
+    color: var(--text-gray);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    margin: 20px;
+    line-height: 1.6;
+}
+
+/* ============================
+   カードスタイル
+============================ */
+.card {
+    background: var(--base-white);
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    margin-bottom: 20px;
+}
+
+/* ============================
+   入力要素（input / select / textarea）
+============================ */
+input,
+select,
+textarea {
+    width: 100%;
+    padding: 10px 12px;
+    background: var(--base-white);
+    border: 1px solid var(--line-gray);
+    border-radius: 8px;
+    font-size: 16px;
+    margin-bottom: 12px;
+    box-sizing: border-box;
+}
+
+textarea {
+    height: 120px;
+    resize: vertical;
+}
+
+/* ============================
+   ボタン（アクセントカラー / 半円角）
+============================ */
+button {
+    background: var(--accent-blue);
+    color: var(--base-white);
+    padding: 12px 20px;
+    border: none;
+    border-radius: 999px; /* 半円の角丸 */
+    font-size: 16px;
+    cursor: pointer;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+    transition: 0.2s;
+}
+
+button:hover {
+    opacity: 0.9;
+    transform: translateY(-2px);
+}
+
+/* ============================
+   iPhone風トグルボタン
+============================ */
+.toggle {
+    position: relative;
+    width: 50px;
+    height: 30px;
+    display: inline-block;
+    border-radius: 999px;
+    cursor: pointer;
+}
+
+/* input 非表示 */
+.toggle input {
+    display: none;
+}
+
+/* 背景（iOS風グロウ） */
+.toggle .track {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    border-radius: 999px;
+    background: linear-gradient(180deg, #d0d0d0, #b5b5b5);
+    transition: background 0.3s ease, box-shadow 0.3s ease;
+    box-shadow: inset 0 1px 3px rgba(0,0,0,0.25);
+}
+
+/* つまみ（白い丸） */
+.toggle .thumb {
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    width: 24px;
+    height: 24px;
+    background: radial-gradient(circle at 30% 30%, #ffffff, #e6e6e6);
+    border-radius: 50%;
+    box-shadow: 0 3px 6px rgba(0,0,0,0.25);
+    transition: transform 0.25s ease;
+}
+
+/* ON：背景がブルーの発光グラデに変わる */
+.toggle input:checked ~ .track {
+    background: linear-gradient(180deg, #4fa3ff, #1f78ff);
+    box-shadow: 0 0 12px rgba(79,163,255,0.6),
+                inset 0 1px 3px rgba(0,0,0,0.25);
+}
+
+/* ON：白丸が右へスライド */
+.toggle input:checked ~ .thumb {
+    transform: translateX(20px);
+}
