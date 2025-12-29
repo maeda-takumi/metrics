@@ -28,6 +28,23 @@ class Model {
         $stmt->execute([$value]);
         return $stmt->fetchAll();
     }
+    
+    /**
+     * Returns the first existing table name from the provided candidates.
+     */
+    protected function findExistingTable(array $candidates): ?string {
+        foreach ($candidates as $candidate) {
+            $stmt = $this->pdo->prepare('SHOW TABLES LIKE ?');
+            $stmt->execute([$candidate]);
+
+            if ($stmt->fetchColumn()) {
+                return $candidate;
+            }
+        }
+
+        return null;
+    }
+    
     public function insert($data) {
         // $data = ['name' => 'Taro', 'email' => 'test@test.com']
         $columns = implode(", ", array_keys($data));

@@ -10,18 +10,13 @@ class Video extends Model {
     }
 
     private function determineTableName(): string {
-        $candidates = ['videos', 'video'];
+        $candidates = ['youtube_video_metrics', 'video'];
 
-        foreach ($candidates as $candidate) {
-            $stmt = $this->pdo->prepare('SHOW TABLES LIKE ?');
-            $stmt->execute([$candidate]);
-
-            if ($stmt->fetchColumn()) {
-                return $candidate;
-            }
+        $existingTable = $this->findExistingTable($candidates);
+        if ($existingTable !== null) {
+            return $existingTable;
         }
-
-        return $this->table;
+        throw new DomainException('動画テーブルが見つかりません。videos テーブルを作成するか、マイグレーションを実行してください。');
     }
 
     public function findByPerformerId(int $performerId): array {

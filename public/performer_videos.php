@@ -23,7 +23,6 @@ if ($performerId === null) {
     $errorMessage = 'performer_id が正しく指定されていません。';
 } else {
     $performerModel = new Performer();
-    $videoModel = new Video();
 
     $matches = $performerModel->where('performer_id', $performerId);
     $performer = $matches[0] ?? null;
@@ -32,7 +31,13 @@ if ($performerId === null) {
         http_response_code(404);
         $errorMessage = '指定されたパフォーマーは見つかりませんでした。';
     } else {
-        $videoList = $videoModel->findByPerformerId($performerId);
+        try {
+            $videoModel = new Video();
+            $videoList = $videoModel->findByPerformerId($performerId);
+        } catch (DomainException $e) {
+            http_response_code(500);
+            $errorMessage = '動画テーブルが見つかりません。videos テーブルを作成するか、マイグレーションを実行してください。';
+        }
     }
 }
 
