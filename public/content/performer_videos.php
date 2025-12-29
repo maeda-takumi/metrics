@@ -46,6 +46,14 @@ $performerName = $performer['performer_name'] ?? 'パフォーマー';
             <?php endif; ?>
             <div class="performer-actions">
                 <button
+                    class="button"
+                    type="button"
+                    data-action="open-video-modal"
+                    data-target="#video-add-modal"
+                >
+                    新規追加
+                </button>
+                <button
                     class="button secondary"
                     type="button"
                     data-action="fetch-performer-views"
@@ -57,7 +65,26 @@ $performerName = $performer['performer_name'] ?? 'パフォーマー';
             </div>
         </div>
     </section>
+    <div class="modal" id="video-add-modal" aria-hidden="true" data-modal>
+        <div class="modal__backdrop" data-modal-close></div>
+        <div class="modal__dialog" role="dialog" aria-modal="true" aria-labelledby="video-add-modal-title">
+            <div class="modal__header">
+                <h3 id="video-add-modal-title">動画を新規追加</h3>
+                <button class="modal__close" type="button" aria-label="閉じる" data-modal-close>&times;</button>
+            </div>
+            <form class="modal__body" data-video-create-form data-performer-id="<?= htmlspecialchars((string)$performerId, ENT_QUOTES, 'UTF-8') ?>">
+                <label for="video_tag">動画タグ</label>
+                <input type="text" name="video_tag" id="video_tag" placeholder="例: MV-001" required>
 
+                <label for="video_id">video_id（YouTube の ID または URL）</label>
+                <input type="text" name="video_id" id="video_id" placeholder="例: dQw4w9WgXcQ または https://youtu.be/dQw4w9WgXcQ" required>
+
+                <p class="muted">保存後に一覧へ反映されます。</p>
+                <button class="button primary" type="submit">保存</button>
+                <p class="view-status" data-video-form-status aria-live="polite"></p>
+            </form>
+        </div>
+    </div>
     <?php
     $videoSectionClass = 'video-section video-section--standalone';
     include __DIR__ . '/partials/video-list.php';

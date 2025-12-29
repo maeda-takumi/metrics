@@ -26,20 +26,26 @@ $formatMetric = static function ($value): string {
 };
 ?>
 
-<?php if (!empty($videoList)): ?>
 <section class="card <?= htmlspecialchars($videoSectionClass, ENT_QUOTES, 'UTF-8') ?>">
     <header class="video-header">
         <h3>動画一覧<?= $performerId ? "（performer_id: " . htmlspecialchars((string) $performerId, ENT_QUOTES, 'UTF-8') . "）" : '' ?></h3>
         <p class="muted">サムネイルをクリックすると YouTube で再生します</p>
+        <p class="view-status" data-video-list-status aria-live="polite"></p>
     </header>
 
-    <ul class="video-list">
+    <ul class="video-list" data-video-list data-performer-id="<?= htmlspecialchars((string)$performerId, ENT_QUOTES, 'UTF-8') ?>">
         <?php foreach ($videoList as $video): ?>
             <?php
                 $videoId = $extractVideoId($video['video_id'] ?? $video['video_tag'] ?? '');
                 $thumbUrl = $videoId ? "https://i.ytimg.com/vi/{$videoId}/hqdefault.jpg" : '';
                 $videoUrl = $videoId ? "https://www.youtube.com/watch?v={$videoId}" : '';
+                $primaryKey = isset($video['id']) ? (int)$video['id'] : null;
             ?>
+            <li
+                class="video-item"
+                data-video-id="<?= htmlspecialchars((string)$videoId, ENT_QUOTES, 'UTF-8') ?>"
+                <?= $primaryKey ? 'data-video-primary-id="' . htmlspecialchars((string)$primaryKey, ENT_QUOTES, 'UTF-8') . '"' : '' ?>
+            >
             <li class="video-item" data-video-id="<?= htmlspecialchars((string)$videoId, ENT_QUOTES, 'UTF-8') ?>">
                 <div class="video-content">
                     <div class="video-title-row">
@@ -84,14 +90,18 @@ $formatMetric = static function ($value): string {
                     <?php else: ?>
                         <div class="placeholder-avatar">No Thumbnail</div>
                     <?php endif; ?>
+                    <button
+                        class="button danger"
+                        type="button"
+                        data-action="delete-video"
+                        data-performer-id="<?= htmlspecialchars((string)$performerId, ENT_QUOTES, 'UTF-8') ?>"
+                        <?= $primaryKey ? 'data-video-primary-id="' . htmlspecialchars((string)$primaryKey, ENT_QUOTES, 'UTF-8') . '"' : '' ?>
+                        data-video-id="<?= htmlspecialchars((string)$videoId, ENT_QUOTES, 'UTF-8') ?>"
+                    >
+                        削除
+                    </button>                    
                 </div>
             </li>
         <?php endforeach; ?>
     </ul>
 </section>
-<?php else: ?>
-    <div class="card empty-state">
-        <h2>動画が登録されていません</h2>
-        <p>このパフォーマーに紐づく動画はありません。</p>
-    </div>
-<?php endif; ?>

@@ -297,6 +297,25 @@ textarea {
     outline: 2px solid #c7dbff;
     outline-offset: 2px;
 }
+.button.secondary {
+    background: #e5e7eb;
+    color: #111827;
+    border: 1px solid #d1d5db;
+}
+
+.button.secondary:hover {
+    background: #d1d5db;
+}
+
+.button.danger {
+    background: #fee2e2;
+    color: #b91c1c;
+    border: 1px solid #fecdd3;
+}
+
+.button.danger:hover {
+    background: #fecdd3;
+}
 
 .button-primary {
     background: linear-gradient(135deg, #3b82f6, #2563eb);
@@ -492,4 +511,60 @@ textarea {
 }
 .page-header .button{
     max-width: 350px;
+}
+
+.modal {
+    position: fixed;
+    inset: 0;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.modal.is-open {
+    display: flex;
+}
+
+.modal__backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.45);
+}
+
+.modal__dialog {
+    position: relative;
+    background: #fff;
+    border-radius: 12px;
+    padding: 18px 20px;
+    box-shadow: 0 18px 40px rgba(0, 0, 0, 0.18);
+    max-width: 480px;
+    width: min(92vw, 520px);
+    z-index: 1;
+}
+
+.modal__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 8px;
+}
+
+.modal__header h3 {
+    margin: 0;
+}
+
+.modal__close {
+    border: none;
+    background: transparent;
+    font-size: 24px;
+    line-height: 1;
+    cursor: pointer;
+    color: #4b5563;
+}
+
+.modal__body {
+    display: grid;
+    gap: 8px;
 }
