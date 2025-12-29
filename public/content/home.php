@@ -9,6 +9,10 @@
 <div class="performer-grid">
     <?php if (!empty($performers)): ?>
         <?php foreach ($performers as $performer): ?>
+            <?php
+                $performerId = $performer['performer_id'] ?? $performer['id'] ?? '';
+                $videoList = $videosByPerformer[$performerId] ?? [];
+            ?>
             <article class="performer-card">
                 <div class="performer-thumb">
                     <?php if (!empty($performer['img'])): ?>
@@ -32,6 +36,7 @@
                     <?php endif; ?>
                 </div>
             </article>
+            <?php include __DIR__ . '/partials/video-list.php'; ?>
         <?php endforeach; ?>
     <?php else: ?>
         <div class="card empty-state">
