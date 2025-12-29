@@ -159,7 +159,7 @@ foreach ($result['statistics'] as $videoId => $stats) {
         continue;
     }
 
-    $successViewReal = $viewRealModel->upsertViewCount($videoId, $viewCount, $performerId, $now);
+    $successViewReal = $viewRealModel->upsertViewReal($videoId, $viewCount, $performerId);
     $successVideo = false;
     try {
         $successVideo = $videoModel->updateByVideoId($videoId, ['view_real' => $viewCount], $performerId);

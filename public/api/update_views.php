@@ -108,7 +108,7 @@ foreach ($result['statistics'] as $videoId => $stats) {
     $successViewReal = false;
 
     try {
-        $successViewReal = $viewRealModel->upsertViewCount($videoId, $viewCount, $performerId, $now);
+        $successViewReal = $viewRealModel->upsertViewReal($videoId, $viewCount, $performerId);
     } catch (Throwable $e) {
         YouTubeLogger::log([
             'event' => 'update_views.view_real_update_error',
@@ -119,7 +119,7 @@ foreach ($result['statistics'] as $videoId => $stats) {
         ]);
         $updateErrors[] = [
             'video_id' => $videoId,
-            'message' => 'Failed to upsert view_real: ' . $e->getMessage(),
+            'message' => 'Failed to upsert youtube_video_metrics.view_real: ' . $e->getMessage(),
         ];
     }
 

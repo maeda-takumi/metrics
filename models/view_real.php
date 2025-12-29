@@ -3,28 +3,37 @@
 require_once __DIR__ . '/../core/Model.php';
 
 class ViewReal extends Model {
-    protected $table = 'view_real';
+    protected $table = 'youtube_video_metrics';
 
     public function __construct() {
         parent::__construct();
+        $this->table = $this->determineTableName();
     }
+    private function determineTableName(): string {
+        $candidates = array_unique([
+            $this->table,
+            'videos',
+            'video',
+            'view_real',
+        ]);
 
-    public function upsertViewCount(string $videoId, int $viewCount, ?int $performerId, string $fetchedAt): bool {
+        return $this->findExistingTable($candidates) ?? $this->table;
+    }
+    public function upsertViewReal(string $videoId, int $viewReal, ?int $performerId): bool {
         $sql = <<<SQL
-            INSERT INTO {$this->table} (video_id, performer_id, view_count, fetched_at)
-            VALUES (?, ?, ?, ?)
+            INSERT INTO {$this->table} (video_id, performer_id, view_real)
+            VALUES (?, ?, ?)
             ON DUPLICATE KEY UPDATE
                 performer_id = VALUES(performer_id),
-                view_count = VALUES(view_count),
-                fetched_at = VALUES(fetched_at)
+                view_real = VALUES(view_real),
+                updated_at = NOW()
         SQL;
 
         $stmt = $this->pdo->prepare($sql);
         return $stmt->execute([
             $videoId,
             $performerId,
-            $viewCount,
-            $fetchedAt,
+            $viewReal,
         ]);
     }
 
