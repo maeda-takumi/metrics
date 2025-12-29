@@ -23,12 +23,12 @@ body {
 
 .page-header {
     display: flex;
-    align-items: center;
+    align-items: left;
     justify-content: space-between;
     gap: 16px;
     margin-bottom: 20px;
+    flex-direction: column;
 }
-
 .eyebrow {
     text-transform: uppercase;
     letter-spacing: 0.08em;
@@ -489,4 +489,7 @@ textarea {
     .csv-export-controls select {
         min-width: 100%;
     }
+}
+.page-header .button{
+    max-width: 350px;
 }
